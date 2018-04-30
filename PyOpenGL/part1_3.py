@@ -32,11 +32,16 @@ def main():
     # create the shader
     vertex_shader = """
     #version 330
-    in vec4 fragCoord;
+    in vec3 position;
     void main()
     {
-        gl_Position = fragCoord;
+        gl_Position = vec4(position, 1.0);
     }
+    """
+
+    """
+    Note that the output of the vertex shader must be vec4 variable. So if the input is
+    2d or 3d, then you should fill up the other components
     """
 
     fragment_shader = """
@@ -69,6 +74,9 @@ def main():
     glVertexAttribPointer function defines the layout of our first vertex buffer;
     "0" means define the layout for attribute number 0.
     "3" means that the variables are vec3 made from every 3 floats (GL_FLOAT) in the buffer.
+    GL_FLOAT is the type of each element
+    GL_FALSE is a normalization
+    "0" is the stride (how many bytes are between each postion)
     """
     glUseProgram(shader)
 
@@ -92,14 +100,6 @@ def main():
     glfw.destroy_window(mywin)
     glfw.terminate()
 
-
-if __name__ == "__main__":
-    main()
-
-    while not glfw.window_should_close(mywin):
-
-        glfw.swap_buffers(mywin)  # swap the front and back buffer
-        glfw.poll_events()  # listen for events
 
 if __name__ == "__main__":
     main()

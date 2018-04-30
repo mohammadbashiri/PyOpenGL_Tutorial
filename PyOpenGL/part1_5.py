@@ -10,8 +10,8 @@ def main():
         return
 
     # create a window
-    h = 800
-    w = 600
+    h = 600
+    w = 800
     mywin = glfw.create_window(w, h, "My Window", None, None)
 
     # check if the window was initialized
@@ -24,26 +24,31 @@ def main():
 
 
     # create a mesh
-    triangle = [-.5, -.5, 0.,
-                0., .5, 0.,
-                .5, -.5, 0.]
+    triangle = [-.5, -.5, 0., 1., 0., 0.,
+                0., .5, 0.,   0., 1., 0.,
+                .5, -.5, 0.,  0., 0., 1.]
     triangle = np.array(triangle, dtype=np.float32)
 
     # create the shader
     vertex_shader = """
     #version 330
-    in vec4 fragCoord;
+    in vec3 position;
+    in vec3 color;
+    out vec3 newColor;
     void main()
     {
-        gl_Position = fragCoord;
+        gl_Position = vec4(position, 1.0f);
+        newColor = color;
     }
     """
 
     fragment_shader = """
     #version 330
+    in vec3 newColor;
+    out vec4 outColor;
     void main()
     {
-        gl_FragColor = vec4(1.0, 1.0, 0.0, .1);
+        outColor = vec4(newColor, 1.0f);
     }
     """
 
@@ -51,25 +56,18 @@ def main():
     shader = OpenGL.GL.shaders.compileProgram(OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
                                               OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER))
 
-    """
-    now we have to copy the data for the triangle to onto the graphics card
-    by using a unit called Vertext Buffer Object (VBO). To do this we:
-    1. generate an empty buffer.
-    2. set it as the current buffer in OpenGL's state machine by "binding"
-    3. copy the points into the currently bound buffer
-    """
     VBO = glGenBuffers(1) # create empty buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO) # bind it
     glBufferData(GL_ARRAY_BUFFER, triangle.shape[0] * 4, triangle, GL_STATIC_DRAW) # copy the triangle data into the buffer
 
 
-    glEnableVertexAttribArray(0)  # enable the vertex attribute in position 0
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-    """
-    glVertexAttribPointer function defines the layout of our first vertex buffer;
-    "0" means define the layout for attribute number 0.
-    "3" means that the variables are vec3 made from every 3 floats (GL_FLOAT) in the buffer.
-    """
+    glEnableVertexAttribArray(0)  # 0 is the index of position attribute in vertex shader
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
+
+    glEnableVertexAttribArray(1)  # 1 is the index of color attribute in vertex shader
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
+
+
     glUseProgram(shader)
 
     # add some color (background)
