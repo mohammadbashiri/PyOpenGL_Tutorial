@@ -95,11 +95,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    while not glfw.window_should_close(mywin):
-
-        glfw.swap_buffers(mywin)  # swap the front and back buffer
-        glfw.poll_events()  # listen for events
-
-if __name__ == "__main__":
-    main()
